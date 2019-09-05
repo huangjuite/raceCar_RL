@@ -14,7 +14,6 @@ for i in enumerate(env.observation_space.shape):
     nfeatures.append(i[1])
 print(nfeatures)
 
-'''
 RL = DeepQNetwork(n_actions=env.action_space.shape[0],
                   n_features=nfeatures,
                   learning_rate=0.01, e_greedy=0.9,
@@ -48,4 +47,3 @@ for i_episode in range(1000):
         total_steps += 1
 
 RL.plot_cost()
-'''
