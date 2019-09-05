@@ -182,7 +182,7 @@ class DeepQNetwork:
             sample_index = np.random.choice(self.memory_size, size=self.batch_size)
         else:
             sample_index = np.random.choice(self.memory_counter, size=self.batch_size)
-        batch_memory = [self.memory[i] for i in sample_index]
+        batch_memory = np.array([self.memory[i] for i in sample_index])
 
         q_next, q_eval = self.sess.run(
             [self.q_next, self.q_eval],
@@ -195,8 +195,8 @@ class DeepQNetwork:
         q_target = q_eval.copy()
 
         batch_index = np.arange(self.batch_size, dtype=np.int32)
-        eval_act_index = batch_memory[:, self.n_features].astype(int)
-        reward = batch_memory[:, self.n_features + 1]
+        eval_act_index = batch_memory[:, 1].astype(int)
+        reward = batch_memory[:, 2]
 
         q_target[batch_index, eval_act_index] = reward + self.gamma * np.max(q_next, axis=1)
 
@@ -228,7 +228,7 @@ class DeepQNetwork:
 
         # train eval network
         _, self.cost = self.sess.run([self._train_op, self.loss],
-                                     feed_dict={self.s: batch_memory[:, :self.n_features],
+                                     feed_dict={self.s: batch_memory[:, :1],
                                                 self.q_target: q_target})
         self.cost_his.append(self.cost)
 
