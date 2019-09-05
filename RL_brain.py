@@ -78,15 +78,15 @@ class DeepQNetwork:
                 b1 = tf.get_variable('b1', [16], initializer=b_initializer,collections=c_names)
                 conv1 = tf.nn.conv2d(self.s, k1,strides=[1, 1, 1, 1], padding='SAME')
                 conv1 = tf.nn.relu(conv1 + b1)
-                pool1 = tf.nn.max_pool(conv1, ksize=4, strides=4, padding='VALID')
+                pool1 = tf.nn.max_pool(conv1, ksize=[1,4,4,1], strides=[1,4,4,1], padding='VALID')
                 
 
             with tf.variable_scope('conv2'):
                 k2 = tf.get_variable('k2', [5,5,16,32], initializer=w_initializer, collections=c_names)
-                b2 = tf.get_variable('b2', [16], initializer=b_initializer,collections=c_names)
+                b2 = tf.get_variable('b2', [32], initializer=b_initializer,collections=c_names)
                 conv2 = tf.nn.conv2d(pool1, k2,strides=[1, 1, 1, 1], padding='SAME')
                 conv2 = tf.nn.relu(conv2 + b2)
-                pool2 = tf.nn.max_pool(conv2, ksize=2, strides=2, padding='VALID')
+                pool2 = tf.nn.max_pool(conv2, ksize=[1,2,2,1], strides=[1,2,2,1], padding='VALID')
                 #96/4/2 = 12
                 flat = tf.reshape(pool2, [-1, 12*12*32])
 
@@ -117,15 +117,15 @@ class DeepQNetwork:
                 b1 = tf.get_variable('b1', [16], initializer=b_initializer,collections=c_names)
                 conv1 = tf.nn.conv2d(self.s_, k1,strides=[1, 1, 1, 1], padding='SAME')
                 conv1 = tf.nn.relu(conv1 + b1)
-                pool1 = tf.nn.max_pool(conv1, ksize=4, strides=4, padding='VALID')
+                pool1 = tf.nn.max_pool(conv1, ksize=[1,4,4,1], strides=[1,4,4,1], padding='VALID')
                 
 
             with tf.variable_scope('conv2'):
                 k2 = tf.get_variable('k2', [5,5,16,32], initializer=w_initializer, collections=c_names)
-                b2 = tf.get_variable('b2', [16], initializer=b_initializer,collections=c_names)
+                b2 = tf.get_variable('b2', [32], initializer=b_initializer,collections=c_names)
                 conv2 = tf.nn.conv2d(pool1, k2,strides=[1, 1, 1, 1], padding='SAME')
                 conv2 = tf.nn.relu(conv2 + b2)
-                pool2 = tf.nn.max_pool(conv2, ksize=2, strides=2, padding='VALID')
+                pool2 = tf.nn.max_pool(conv2, ksize=[1,2,2,1], strides=[1,2,2,1], padding='VALID')
                 #96/4/2 = 12
                 flat = tf.reshape(pool2, [-1, 12*12*32])
 

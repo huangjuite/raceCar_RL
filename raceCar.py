@@ -15,7 +15,7 @@ for i in enumerate(env.observation_space.shape):
 print(nfeatures)
 
 RL = DeepQNetwork(n_actions=env.action_space.shape[0],
-                  n_features=nfeatures,
+                  features=nfeatures,
                   learning_rate=0.01, e_greedy=0.9,
                   replace_target_iter=100, memory_size=2000,
                   e_greedy_increment=0.001,)
