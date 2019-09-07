@@ -53,7 +53,9 @@ class DeepQNetwork:
         e_params = tf.get_collection('eval_net_params')
         self.replace_target_op = [tf.assign(t, e) for t, e in zip(t_params, e_params)]
 
-        self.sess = tf.Session()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth=True
+        self.sess = tf.Session(config=config)
 
         if output_graph:
             # $ tensorboard --logdir=logs
@@ -82,7 +84,7 @@ class DeepQNetwork:
                 
 
             with tf.variable_scope('conv2'):
-                k2 = tf.get_variable('k2', [5,5,16,32], initializer=w_initializer, collections=c_names)
+                k2 = tf.get_variable('k2', [3,3,16,32], initializer=w_initializer, collections=c_names)
                 b2 = tf.get_variable('b2', [32], initializer=b_initializer,collections=c_names)
                 conv2 = tf.nn.conv2d(pool1, k2,strides=[1, 1, 1, 1], padding='SAME')
                 conv2 = tf.nn.relu(conv2 + b2)
@@ -99,7 +101,7 @@ class DeepQNetwork:
             with tf.variable_scope('fc2'):
                 w4 = tf.get_variable('w4', [10, self.n_actions], initializer=w_initializer, collections=c_names)
                 b4 = tf.get_variable('b4', [1,self.n_actions], initializer=b_initializer,collections=c_names)
-                self.q_eval = tf.nn.relu(tf.matmul(l3,w4) + b4)
+                self.q_eval = tf.matmul(l3,w4) + b4
 
         with tf.variable_scope('loss'):
             self.loss = tf.reduce_mean(tf.squared_difference(self.q_target, self.q_eval))
@@ -121,7 +123,7 @@ class DeepQNetwork:
                 
 
             with tf.variable_scope('conv2'):
-                k2 = tf.get_variable('k2', [5,5,16,32], initializer=w_initializer, collections=c_names)
+                k2 = tf.get_variable('k2', [3,3,16,32], initializer=w_initializer, collections=c_names)
                 b2 = tf.get_variable('b2', [32], initializer=b_initializer,collections=c_names)
                 conv2 = tf.nn.conv2d(pool1, k2,strides=[1, 1, 1, 1], padding='SAME')
                 conv2 = tf.nn.relu(conv2 + b2)
@@ -138,17 +140,13 @@ class DeepQNetwork:
             with tf.variable_scope('fc2'):
                 w4 = tf.get_variable('w4', [10, self.n_actions], initializer=w_initializer, collections=c_names)
                 b4 = tf.get_variable('b4', [1,self.n_actions], initializer=b_initializer,collections=c_names)
-                self.q_next = tf.nn.relu(tf.matmul(l3,w4) + b4)
+                self.q_next = tf.matmul(l3,w4) + b4
 
     def store_transition(self, s, a, r, s_):
         if not hasattr(self, 'memory_counter'):
             self.memory_counter = 0
 
-        transition = []
-        transition.append(s)
-        transition.append(a)
-        transition.append(r)
-        transition.append(s_)
+        transition = [s,a,r,s_]
 
         # replace the old memory with new memory
         index = self.memory_counter % self.memory_size
@@ -187,8 +185,8 @@ class DeepQNetwork:
         q_next, q_eval = self.sess.run(
             [self.q_next, self.q_eval],
             feed_dict={
-                self.s_: batch_memory[:, -1:],  # fixed params
-                self.s: batch_memory[:, :1],  # newest params
+                self.s_: np.squeeze(batch_memory[:, -1:]).tolist(),  # fixed params
+                self.s: np.squeeze(batch_memory[:, :1]).tolist(),  # newest params
             })
 
         # change q_target w.r.t q_eval's action
@@ -228,7 +226,7 @@ class DeepQNetwork:
 
         # train eval network
         _, self.cost = self.sess.run([self._train_op, self.loss],
-                                     feed_dict={self.s: batch_memory[:, :1],
+                                     feed_dict={self.s: np.squeeze(batch_memory[:, :1]).tolist(),
                                                 self.q_target: q_target})
         self.cost_his.append(self.cost)
 
